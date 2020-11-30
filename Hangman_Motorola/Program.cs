@@ -9,6 +9,7 @@ namespace Hangman_Motorola
     {
         List<string> countries = new List<string>();
         List<string> capitals = new List<string>();
+        List<string> lettersNotInWord = new List<string>();
 
         //Give the path of txt file on your local machine
         string[] locationReader()
@@ -40,11 +41,14 @@ namespace Hangman_Motorola
             countriesAndCapitalsCreator(locations);
 
             int wordNumber = wordNumberGenerator(locations);
-            string wordToGuess = "Madrid"; //capitals[wordNumber];
+            string wordToGuess = capitals[166].ToUpper();
 
             StringBuilder dashWord = new StringBuilder(wordToGuess.Length);
             for (int i = 0; i < wordToGuess.Length; i++)
+                if(wordToGuess[i].Equals(' '))
                 {
+                    dashWord.Append(" ");
+                } else {
                     dashWord.Append("_");
                 }
 
@@ -52,12 +56,16 @@ namespace Hangman_Motorola
             Console.WriteLine(wordToGuess);
             while (lives > 0)
             {
+                if (lives == 1)
+                {
+                    Console.WriteLine("The Capital of {0}", countries[wordNumber]);
+                }
                 Console.WriteLine("Choose your letter");
                 Console.WriteLine(dashWord);
-                string givenLetter = Console.ReadLine();
+                string givenLetter = Console.ReadLine().ToUpper();
                 if (wordToGuess.Contains(givenLetter))
                 {
-                    Console.WriteLine("Letter found");
+
                     int letterPosition = wordToGuess.IndexOf(givenLetter);
                     dashWord.Replace(dashWord[letterPosition], givenLetter[0], letterPosition, 1);
 
@@ -76,6 +84,15 @@ namespace Hangman_Motorola
                 } else
                 {
                     lives--;
+
+                    if (!lettersNotInWord.Contains(givenLetter))
+                    {
+                        lettersNotInWord.Add(givenLetter);
+                    }
+                    Console.WriteLine(string.Format("Missed letters: {0}", string.Join(", ", lettersNotInWord)));
+                    Console.WriteLine("Lives: {0}", lives);
+                    
+
                 }
 
             }
