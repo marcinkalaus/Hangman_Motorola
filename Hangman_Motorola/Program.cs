@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
+using System.Linq;
 
 namespace Hangman_Motorola
 {
@@ -32,6 +33,7 @@ namespace Hangman_Motorola
             int wordNumber = random.Next(0, locations.Length);
             return wordNumber; 
         }
+
         string readLetter()
         {
             Console.WriteLine("Choose your letter");
@@ -54,11 +56,63 @@ namespace Hangman_Motorola
             Console.WriteLine("Number of trials: {0}", trialCounter);
         }
 
+        void doWhileWin(string wordToGuess)
+        {
+            watch.Stop();
+            printWinMessage();
+            saveUserScoreInFile(wordToGuess);
+            printTenBestHighscores();
+            repeatGame();
+        }
+        void saveUserScoreInFile(string wordToGuess)
+        {
+            Console.WriteLine("What is your name?");
+            string userName = Console.ReadLine();
+            string date = DateTime.Now.ToString("dd/MM/yyyy HH:mm");
+            string userEntry = String.Format("{0,20} | {1} |      {2:D3}      |       {3}        | {4}", userName, date, watch.ElapsedMilliseconds/1000, trialCounter, wordToGuess);
+
+            using (System.IO.StreamWriter file =
+            new System.IO.StreamWriter(@"C:\Users\marci\source\repos\Hangman_Motorola\Hangman_Motorola\Scoreboard.txt", true))
+            {
+                file.WriteLine(userEntry);
+            }
+        }
+
+        //Give the path for txt file on your local machine
+        void printTenBestHighscores()
+        {
+            string[] scoreboard = System.IO.File.ReadAllLines(@"C:\Users\marci\source\repos\Hangman_Motorola\Hangman_Motorola\Scoreboard.txt");
+
+            IEnumerable<string> query = from score in scoreboard
+                                        orderby score.Split('|')[2].Substring(6,3)
+                                            select score;
+
+            List<string> sortedScores = new List<string>();
+            foreach (string score in query)
+            {
+                sortedScores.Add(score);
+            }
+            Console.WriteLine("                name |             date | guessing time | guessing tries | guessed word");
+            
+            if (sortedScores.Count >= 10)
+            {
+                for (int i = 0; i < 10; i++)
+                {
+                    Console.WriteLine(sortedScores[i]);
+                }
+            } else
+            {
+                for (int i = 0; i < sortedScores.Count; i++)
+                {
+                    Console.WriteLine(sortedScores[i]);
+                }
+            }
+        }
+
         void repeatGame()
         {
             Console.WriteLine("Would you like to play again?");
             Console.WriteLine("Type: 1 - yes, 2 - no");
-
             int option = Int32.Parse(Console.ReadLine());
 
             if (option == 1)
@@ -83,8 +137,8 @@ namespace Hangman_Motorola
 
             int wordNumber = wordNumberGenerator(locations);
             string wordToGuess = capitals[wordNumber].ToUpper();
-
             StringBuilder dashWord = new StringBuilder(wordToGuess.Length);
+
             for (int i = 0; i < wordToGuess.Length; i++)
                 if(wordToGuess[i].Equals(' '))
                 {
@@ -93,11 +147,17 @@ namespace Hangman_Motorola
                     dashWord.Append("_");
                 }
 
+            Console.WriteLine("Welcome to the HANGMAN GAME!\n" +
+                "Your task is to guess the capital of country.\n" +
+                "You can guess the letter or whole word at once but be careful!\n" +
+                "Wrong guess of letter will cost you live, word - 2 lives!\n" +
+                "You have 5 lives. Enjoy!\n" +
+                "---------------------------------------------------\n\n");
+
             watch.Start();
             int lives = 5;
-            
             // To quicker check how the program works you can uncomment line below.
-            Console.WriteLine(wordToGuess);
+            // Console.WriteLine(wordToGuess);
 
             while (lives > 0)
             {
@@ -109,12 +169,13 @@ namespace Hangman_Motorola
 
                 Console.WriteLine(dashWord);
 
-                Console.WriteLine("Would you like to guess a letter or the whole word?");
-                Console.WriteLine("1 - letter, 2 - word");
-
-                
-                int guessOption = Int32.Parse(Console.ReadLine());
-
+                int guessOption = 0;
+                while (!((guessOption.Equals(1)) || (guessOption.Equals(2))))
+                {
+                    Console.WriteLine("Would you like to guess a letter or the whole word?");
+                    Console.WriteLine("1 - letter, 2 - word");
+                    guessOption = Int32.Parse(Console.ReadLine());
+                }
 
                 if (guessOption == 1)
                 {
@@ -123,7 +184,6 @@ namespace Hangman_Motorola
 
                     if (wordToGuess.Contains(givenLetter[0]))
                     {
-
                         int letterPosition = wordToGuess.IndexOf(givenLetter[0]);
                         dashWord.Replace(dashWord[letterPosition], givenLetter[0], letterPosition, 1);
 
@@ -135,9 +195,7 @@ namespace Hangman_Motorola
 
                         if (dashWord.Equals(wordToGuess))
                         {
-                            watch.Stop();
-                            printWinMessage();
-                            repeatGame();
+                            doWhileWin(wordToGuess);
                         }
                     }
                     else
@@ -155,13 +213,9 @@ namespace Hangman_Motorola
                 {
                     string givenWord = readWord();
                     trialCounter++;
-
-
                     if (givenWord.Equals(wordToGuess))
                     {
-                        watch.Stop();
-                        printWinMessage();
-                        repeatGame();
+                        doWhileWin(wordToGuess);
                     } else
                     {
                         Console.WriteLine("---------------------------------------------------");
@@ -178,7 +232,7 @@ namespace Hangman_Motorola
             Console.WriteLine("The word was: {0}", wordToGuess);
             repeatGame();
         }
-        
+     
         static void Main(string[] args)
         {
             Program game = new Program();
