@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Diagnostics;
 using System.Text;
 
 namespace Hangman_Motorola
@@ -44,6 +44,16 @@ namespace Hangman_Motorola
             return Console.ReadLine().ToUpper();
         }
 
+        static Stopwatch watch = new Stopwatch();
+        int trialCounter = 0;
+        void printWinMessage()
+        {
+            Console.WriteLine("---------------------------------------------------");
+            Console.WriteLine("You won!");
+            Console.WriteLine("Your time: {0}m {1}s", watch.Elapsed.Minutes, watch.Elapsed.Seconds);
+            Console.WriteLine("Number of trials: {0}", trialCounter);
+        }
+
         void repeatGame()
         {
             Console.WriteLine("Would you like to play again?");
@@ -83,8 +93,12 @@ namespace Hangman_Motorola
                     dashWord.Append("_");
                 }
 
+            watch.Start();
             int lives = 5;
-           // Console.WriteLine(wordToGuess);
+            
+            // To quicker check how the program works you can uncomment line below.
+            Console.WriteLine(wordToGuess);
+
             while (lives > 0)
             {
                 Console.WriteLine("Lives: {0}", lives);
@@ -105,11 +119,12 @@ namespace Hangman_Motorola
                 if (guessOption == 1)
                 {
                     string givenLetter = readLetter();
+                    trialCounter++;
 
-                    if (wordToGuess.Contains(givenLetter))
+                    if (wordToGuess.Contains(givenLetter[0]))
                     {
 
-                        int letterPosition = wordToGuess.IndexOf(givenLetter);
+                        int letterPosition = wordToGuess.IndexOf(givenLetter[0]);
                         dashWord.Replace(dashWord[letterPosition], givenLetter[0], letterPosition, 1);
 
                         while (wordToGuess.IndexOf(givenLetter, letterPosition + 1) != -1)
@@ -120,11 +135,10 @@ namespace Hangman_Motorola
 
                         if (dashWord.Equals(wordToGuess))
                         {
-                            Console.WriteLine("---------------------------------------------------");
-                            Console.WriteLine("You won!");
+                            watch.Stop();
+                            printWinMessage();
                             repeatGame();
                         }
-
                     }
                     else
                     {
@@ -140,12 +154,14 @@ namespace Hangman_Motorola
                 } else if (guessOption == 2)
                 {
                     string givenWord = readWord();
+                    trialCounter++;
+
 
                     if (givenWord.Equals(wordToGuess))
                     {
-                        Console.WriteLine("You won!");
-                        Console.WriteLine("---------------------------------------------------");
-                        break;
+                        watch.Stop();
+                        printWinMessage();
+                        repeatGame();
                     } else
                     {
                         Console.WriteLine("---------------------------------------------------");
@@ -159,9 +175,9 @@ namespace Hangman_Motorola
             }
             Console.WriteLine("---------------------------------------------------");
             Console.WriteLine("You lose! :(");
+            Console.WriteLine("The word was: {0}", wordToGuess);
             repeatGame();
         }
-            
         
         static void Main(string[] args)
         {
