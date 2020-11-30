@@ -33,6 +33,22 @@ namespace Hangman_Motorola
             return wordNumber; 
         }
 
+        void repeatGame()
+        {
+            Console.WriteLine("Would you like to play again?");
+            Console.WriteLine("Type: 1 - yes, 2 - no");
+
+            int option = Int32.Parse(Console.ReadLine());
+
+            if (option == 1)
+            {
+                play();
+            } else
+            {
+                Environment.Exit(0);
+            }
+        }
+
         void play()
         {
             Program program = new Program();
@@ -56,6 +72,7 @@ namespace Hangman_Motorola
             Console.WriteLine(wordToGuess);
             while (lives > 0)
             {
+                Console.WriteLine("Lives: {0}", lives);
                 if (lives == 1)
                 {
                     Console.WriteLine("The Capital of {0}", countries[wordNumber]);
@@ -77,7 +94,7 @@ namespace Hangman_Motorola
 
                     if (dashWord.Equals(wordToGuess))
                     {
-                        Console.WriteLine("extra");
+                        Console.WriteLine("You won!");
                         break;
                     }
 
@@ -90,12 +107,13 @@ namespace Hangman_Motorola
                         lettersNotInWord.Add(givenLetter);
                     }
                     Console.WriteLine(string.Format("Missed letters: {0}", string.Join(", ", lettersNotInWord)));
-                    Console.WriteLine("Lives: {0}", lives);
+
                     
 
                 }
 
             }
+            repeatGame();
 
         }
             
